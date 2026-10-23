@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101827" />
+    <meta
+      name="description"
+      content="A local demo for turning a rough message into an audience-aware draft."
+    />
+    <title>VibeRewrite 2026 — Persona Transformer</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-glow" aria-hidden="true"></div>
+
+    <header class="site-header page-width">
+      <a class="brand" href="#top" aria-label="VibeRewrite home">
+        <span class="brand-symbol" aria-hidden="true"><span></span><span></span></span>
+        <span>vibe<span class="brand-accent">rewrite</span><sup>26</sup></span>
+      </a>
+      <span class="mode-badge"><span class="mode-dot" aria-hidden="true"></span> Local demo · No live AI</span>
+    </header>
+
+    <main id="top" class="page-width">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-line"></span> Problem statement 01 / Communication, transformed</p>
+          <h1 id="hero-title">One message.<br /><em>The right voice.</em></h1>
+          <p class="hero-description">A communication workspace for turning rough thoughts into audience-ready drafts. Pick a voice, tune the delivery, and see exactly what changed.</p>
+          <div class="hero-meta"><span class="meta-spark" aria-hidden="true">✦</span><span>Four voices</span><span class="meta-divider">/</span><span>Three tone controls</span><span class="meta-divider">/</span><span>Instant comparison</span></div>
+        </div>
+        <div class="hero-steps" aria-label="How it works">
+          <div><strong>01</strong><span>Write a rough draft</span></div>
+          <div><strong>02</strong><span>Choose a persona</span></div>
+          <div><strong>03</strong><span>Review the changes</span></div>
+        </div>
+      </section>
+
+      <div class="workspace">
+        <section class="panel editor-panel" aria-labelledby="editor-title">
+          <div class="panel-topline">
+            <div>
+              <p class="section-kicker">The input</p>
+              <h2 id="editor-title">Shape your message</h2>
+            </div>
+            <span class="panel-index">01 / 02</span>
+          </div>
+
+          <form id="rewrite-form">
+            <div class="field-heading">
+              <label for="rough-input">Rough text or bullet points</label>
+              <span id="char-count" class="character-count">0 / 1,200</span>
+            </div>
+            <textarea
+              id="rough-input"
+              name="rough-input"
+              rows="6"
+              maxlength="1200"
+              spellcheck="true"
+              placeholder="Type what you want to say. Imperfect is fine."
+            >Testing found bugs and the project is delayed. We need two more days.</textarea>
+            <div class="input-support"><p class="field-hint">Start with a thought, not a perfect draft.</p><button id="example-button" class="text-button" type="button">↺ Use example</button></div>
+
+            <fieldset class="persona-fieldset">
+              <legend>Who is it for?</legend>
+              <div class="persona-grid">
+                <label class="persona-option">
+                  <input type="radio" name="persona" value="executive" checked />
+                  <span class="persona-card"><span class="persona-icon" aria-hidden="true">↗</span><strong>Executive / C-level</strong><small>Concise &amp; direct</small></span>
+                </label>
+                <label class="persona-option">
+                  <input type="radio" name="persona" value="supportive" />
+                  <span class="persona-card"><span class="persona-icon" aria-hidden="true">♥</span><strong>Supportive peer</strong><small>Warm &amp; clear</small></span>
+                </label>
+                <label class="persona-option">
+                  <input type="radio" name="persona" value="legal" />
+                  <span class="persona-card"><span class="persona-icon" aria-hidden="true">§</span><strong>Legal / compliance</strong><small>Careful &amp; precise</small></span>
+                </label>
+                <label class="persona-option">
+                  <input type="radio" name="persona" value="genz" />
+                  <span class="persona-card"><span class="persona-icon" aria-hidden="true">✳</span><strong>Gen-Z</strong><small>Fresh &amp; casual</small></span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="tone-fieldset">
+              <legend>Fine-tune the tone</legend>
+              <div class="tone-control">
+                <div class="tone-heading"><label for="formality">Formality</label><output for="formality" id="formality-value">Balanced</output></div>
+                <input id="formality" name="formality" type="range" min="1" max="5" value="3" />
+                <div class="range-ends"><span>Casual</span><span>Formal</span></div>
+              </div>
+              <div class="tone-control">
+                <div class="tone-heading"><label for="verbosity">Verbosity</label><output for="verbosity" id="verbosity-value">Balanced</output></div>
+                <input id="verbosity" name="verbosity" type="range" min="1" max="5" value="3" />
+                <div class="range-ends"><span>Brief</span><span>Detailed</span></div>
+              </div>
+              <div class="tone-control">
+                <div class="tone-heading"><label for="enthusiasm">Enthusiasm</label><output for="enthusiasm" id="enthusiasm-value">Balanced</output></div>
+                <input id="enthusiasm" name="enthusiasm" type="range" min="1" max="5" value="3" />
+                <div class="range-ends"><span>Reserved</span><span>Energetic</span></div>
+              </div>
+            </fieldset>
+
+            <button class="rewrite-button" type="submit"><span>Rewrite message</span><span aria-hidden="true">↗</span></button>
+            <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section class="panel result-panel" aria-labelledby="result-title">
+          <div class="panel-topline result-heading">
+            <div>
+              <p class="section-kicker">The result</p>
+              <h2 id="result-title">See the difference</h2>
+            </div>
+            <button id="copy-button" class="copy-button" type="button" disabled aria-label="Copy rewritten message">
+              <span aria-hidden="true">⧉</span><span id="copy-label">Copy draft</span>
+            </button>
+          </div>
+
+          <div class="format-bar" aria-label="Output format">
+            <div class="format-title"><strong>Output format</strong><span>Choose how to use this draft</span></div>
+            <div class="format-options" role="group" aria-label="Output format">
+              <button class="format-option" type="button" data-format="plain" aria-pressed="true">Plain</button>
+              <button class="format-option" type="button" data-format="email" aria-pressed="false">Email</button>
+              <button class="format-option" type="button" data-format="slack" aria-pressed="false">Slack</button>
+              <button class="format-option" type="button" data-format="markdown" aria-pressed="false">Markdown</button>
+            </div>
+          </div>
+
+          <div class="comparison" aria-label="Original and rewritten message">
+            <section class="draft-card original-card" aria-labelledby="original-title">
+              <div class="draft-header"><span class="draft-marker original-marker"></span><h3 id="original-title">Original</h3><span>What you wrote</span></div>
+              <div id="original-output" class="draft-body empty-draft"><span class="placeholder-icon" aria-hidden="true">◌</span><p>Your original message will appear here.</p></div>
+            </section>
+            <section class="draft-card rewrite-card" aria-labelledby="rewrite-title">
+              <div class="draft-header"><span class="draft-marker rewrite-marker"></span><h3 id="rewrite-title">Rewritten</h3><span>Persona draft</span></div>
+              <div id="rewritten-output" class="draft-body empty-draft"><span class="placeholder-icon" aria-hidden="true">✳</span><p>Your new draft will appear here.</p></div>
+            </section>
+          </div>
+
+          <div id="change-panel" class="change-panel" hidden>
+            <div class="change-panel-heading"><strong>What changed</strong><span><i class="legend-swatch removed-swatch"></i>Original <i class="legend-swatch added-swatch"></i>Rewrite</span></div>
+            <p id="change-summary"></p>
+          </div>
+
+          <div class="result-actions"><span id="format-description">Copy a clean, unformatted draft.</span><button id="download-button" class="download-button" type="button" disabled>↓ Download draft</button></div>
+
+          <p class="demo-notice"><span aria-hidden="true">ⓘ</span> Transparent demo: fixed rules run in your browser. No AI model or server receives your message. Review the wording before sending.</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer page-width"><span>VibeRewrite 2026</span><span>Built for a clearer conversation.</span></footer>
+  </body>
+</html>
