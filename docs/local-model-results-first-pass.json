@@ -1,0 +1,103 @@
+{
+  "runAt": "2026-10-23T10:00:42.881Z",
+  "model": "qwen3:4b",
+  "modelRequests": 6,
+  "results": [
+    {
+      "name": "invoice request",
+      "text": "Please send the invoice.",
+      "persona": "executive",
+      "formality": 5,
+      "verbosity": 2,
+      "enthusiasm": 1,
+      "status": 200,
+      "result": {
+        "text": "Please send the invoice.",
+        "subject": "Invoice request",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 27799
+    },
+    {
+      "name": "ordinary bugs",
+      "text": "I found a few bugs in the search filter. Can you review them tomorrow?",
+      "persona": "legal",
+      "formality": 5,
+      "verbosity": 3,
+      "enthusiasm": 1,
+      "status": 200,
+      "result": {
+        "text": "I found a few bugs in the search filter. Can you review them tomorrow?",
+        "subject": "Search filter bugs request for review tomorrow",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 2148
+    },
+    {
+      "name": "deadline and amount",
+      "text": "Please send the revised invoice for INR 12,500 by 25 October at 3:00 PM. Do not charge the extra INR 500.",
+      "persona": "executive",
+      "formality": 5,
+      "verbosity": 2,
+      "enthusiasm": 1,
+      "status": 200,
+      "result": {
+        "text": "Please send the revised invoice for INR 12,500 by 25 October at 3:00 PM. Do not charge the extra INR 500.",
+        "subject": "Revised invoice for INR 12,500 due 25 Oct at 3:00 PM",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 3166
+    },
+    {
+      "name": "mixed language",
+      "text": "Kal ki meeting 4:30 PM par shift kar do please. Budget INR 8,000 hi rakhna, extra payment approve nahi hai.",
+      "persona": "supportive",
+      "formality": 2,
+      "verbosity": 3,
+      "enthusiasm": 3,
+      "status": 200,
+      "result": {
+        "text": "Kal ki meeting 4:30 PM par shift kar do please. Budget INR 8,000 hi rakhna, extra payment approve nahi hai.",
+        "subject": "Meeting shift request for tomorrow at 4:30 PM with budget limit of INR 8,000",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 2751
+    },
+    {
+      "name": "casual unfamiliar",
+      "text": "I cannot attend the rehearsal on Friday. Please share the recording and keep my registration active.",
+      "persona": "genz",
+      "formality": 1,
+      "verbosity": 2,
+      "enthusiasm": 4,
+      "status": 200,
+      "result": {
+        "text": "I can't make it to the Friday rehearsal. Could you share the recording and keep my registration active?",
+        "subject": "Rehearsal cancellation: Friday recording and registration",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 1412
+    },
+    {
+      "name": "same meaning warmer fuller",
+      "text": "I cannot attend the rehearsal on Friday. Please share the recording and keep my registration active.",
+      "persona": "supportive",
+      "formality": 4,
+      "verbosity": 5,
+      "enthusiasm": 4,
+      "status": 200,
+      "result": {
+        "text": "I cannot attend the rehearsal on Friday. Please share the recording and keep my registration active.",
+        "subject": "Rehearsal cancellation: Friday recording and registration update",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 1586
+    }
+  ]
+}

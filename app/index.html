@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#101827" />
     <meta
       name="description"
-      content="A local demo for turning a rough message into an audience-aware draft."
+      content="A local AI workspace for turning a rough message into an audience-aware draft."
     />
     <title>VibeRewrite 2026 — Persona Transformer</title>
     <link rel="stylesheet" href="./styles.css" />
@@ -20,7 +20,7 @@
         <span class="brand-symbol" aria-hidden="true"><span></span><span></span></span>
         <span>vibe<span class="brand-accent">rewrite</span><sup>26</sup></span>
       </a>
-      <span class="mode-badge"><span class="mode-dot" aria-hidden="true"></span> Local demo · No live AI</span>
+      <span id="connection-badge" class="mode-badge" data-state="checking"><span class="mode-dot" aria-hidden="true"></span><span id="connection-label">Checking local AI…</span></span>
     </header>
 
     <main id="top" class="page-width">
@@ -36,6 +36,12 @@
           <div><strong>02</strong><span>Choose a persona</span></div>
           <div><strong>03</strong><span>Review the changes</span></div>
         </div>
+      </section>
+
+      <section class="connection-panel" aria-label="AI connection">
+        <div><strong id="connection-title">Connecting to your model</strong><p id="connection-message" role="status" aria-live="polite">Checking the local backend and model availability.</p></div>
+        <button id="connection-retry" class="text-button" type="button">Check connection</button>
+        <details id="setup-help" hidden><summary>Local setup instructions</summary><p>Start Ollama, then run <code>ollama pull qwen3:4b</code>. In the project folder, run <code>node server.mjs</code> and open the address it prints. Keep Ollama and the Node server running. See RUN_APP.md for full instructions.</p></details>
       </section>
 
       <div class="workspace">
@@ -104,7 +110,7 @@
               </div>
             </fieldset>
 
-            <button class="rewrite-button" type="submit"><span>Rewrite message</span><span aria-hidden="true">↗</span></button>
+            <div class="rewrite-actions"><button id="rewrite-button" class="rewrite-button" type="submit"><span id="rewrite-label">Rewrite message</span><span aria-hidden="true">↗</span></button><button id="cancel-button" class="cancel-button" type="button" hidden>Cancel</button></div>
             <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
           </form>
         </section>
@@ -148,7 +154,7 @@
 
           <div class="result-actions"><span id="format-description">Copy a clean, unformatted draft.</span><button id="download-button" class="download-button" type="button" disabled>↓ Download draft</button></div>
 
-          <p class="demo-notice"><span aria-hidden="true">ⓘ</span> Transparent demo: fixed rules run in your browser. No AI model or server receives your message. Review the wording before sending.</p>
+          <p class="demo-notice"><span aria-hidden="true">ⓘ</span><span id="privacy-notice">Ollama runs the AI on this computer. Your message goes to the local Node server, then the local model. AI can still change details; review names, requests, dates, and amounts before sending.</span></p>
         </section>
       </div>
     </main>

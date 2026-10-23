@@ -1,6 +1,6 @@
 "use strict";
 
-// This is a deterministic local demonstration, not a connection to an AI model.
+// The browser calls the local Node backend. Provider credentials never belong here.
 const TONE_LABELS = {
   formality: ["Very casual", "Casual", "Balanced", "Professional", "Formal"],
   verbosity: ["Very brief", "Brief", "Balanced", "Detailed", "Expanded"],
@@ -42,111 +42,76 @@ let currentRewrite = "";
 let currentRaw = "";
 let currentSummary = "";
 let selectedFormat = "plain";
+let currentSubject = "";
+let requestSequence = 0;
+let pendingController = null;
+let connectionSequence = 0;
+const rewriteButton = document.querySelector("#rewrite-button");
+const rewriteLabel = document.querySelector("#rewrite-label");
+const cancelButton = document.querySelector("#cancel-button");
+const connectionBadge = document.querySelector("#connection-badge");
+const connectionLabel = document.querySelector("#connection-label");
+const connectionTitle = document.querySelector("#connection-title");
+const connectionMessage = document.querySelector("#connection-message");
+const connectionRetry = document.querySelector("#connection-retry");
+const setupHelp = document.querySelector("#setup-help");
+const privacyNotice = document.querySelector("#privacy-notice");
+
+function setBusy(busy) {
+  rewriteButton.disabled = busy;
+  rewriteLabel.textContent = busy ? "Rewriting with AI…" : "Rewrite message";
+  cancelButton.hidden = !busy;
+  form.setAttribute("aria-busy", String(busy));
+}
+
+// Invalidate first, then abort: even a response already queued cannot replace a newer draft.
+function cancelPending(message) {
+  requestSequence += 1;
+  const wasPending = Boolean(pendingController);
+  pendingController?.abort();
+  pendingController = null;
+  setBusy(false);
+  if (wasPending && message) setStatus(message);
+  return wasPending;
+}
+
+function showConnection(status) {
+  const ready = status.ready === true;
+  const local = status.provider !== "openai";
+  connectionBadge.dataset.state = ready ? "ready" : "offline";
+  connectionLabel.textContent = ready ? `${local ? "Local AI" : "OpenAI"} · Connected` : "AI not connected";
+  connectionTitle.textContent = ready ? `${status.model || "Model"} is ready` : "Model connection needs attention";
+  connectionMessage.textContent = status.message || (ready ? "Ready to rewrite. The first request can take longer while the model loads." : "Start the Node server and Ollama, then check the connection again.");
+  setupHelp.hidden = ready || !local;
+  privacyNotice.textContent = local
+    ? "Ollama runs the AI on the app host. On a shared demo link, your message travels through the tunnel to that computer. AI can still change details; review names, requests, dates, and amounts before sending."
+    : "OpenAI is selected on the server. Your message is sent to OpenAI; the API key stays on the server. AI can change details, so review the draft before sending.";
+}
+
+async function checkConnection() {
+  const sequence = ++connectionSequence;
+  connectionRetry.disabled = true;
+  connectionMessage.textContent = "Checking the backend and model…";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch("/api/status", { signal: controller.signal, cache: "no-store" });
+    if (!response.ok) throw new Error("The backend status endpoint is unavailable. Run node server.mjs and open the address it prints.");
+    const status = await response.json();
+    if (sequence === connectionSequence) showConnection(status);
+  } catch (error) {
+    if (sequence === connectionSequence) showConnection({ ready: false, message: error.name === "AbortError" ? "Connection check timed out. Start Ollama and retry." : "Cannot reach the Node backend. Run node server.mjs in the project folder, then open its address. A Python static server cannot run AI rewrites." });
+  } finally {
+    clearTimeout(timeout);
+    if (sequence === connectionSequence) connectionRetry.disabled = false;
+  }
+}
 
 function updateToneLabels() {
   for (const input of toneInputs) {
     const output = document.querySelector(`#${input.id}-value`);
     output.value = TONE_LABELS[input.id][Number(input.value) - 1];
   }
-}
-
-function cleanMessage(raw) {
-  const lines = raw
-    .replace(/\r\n?/g, "\n")
-    .split(/\n+/)
-    .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").replace(/\s+/g, " ").trim())
-    .filter(Boolean)
-    .map((line) => (/[.!?]$/.test(line) ? line : `${line}.`));
-
-  const text = lines.join(" ").replace(/\s+([,.!?;:])/g, "$1").replace(/([.!?])(?=\S)/g, "$1 ");
-  return text.replace(/(^|[.!?]\s+)([a-z])/g, (_match, before, letter) => before + letter.toUpperCase());
-}
-
-function replacePhrases(text, persona, formality) {
-  const rules = {
-    executive: [
-      [/\btesting found bugs\b/gi, "Testing identified issues"],
-      [/\bbugs\b/gi, "issues"],
-      [/\bbug\b/gi, "issue"],
-      [/\bwe need\b/gi, "we require"],
-      [/\bmore days\b/gi, "additional days"],
-      [/\bfix\b/gi, "resolve"],
-    ],
-    supportive: [
-      [/\btesting found bugs\b/gi, "We found bugs during testing"],
-      [/\bwe need\b/gi, "we could use"],
-      [/\bfix\b/gi, "work through"],
-    ],
-    legal: [
-      [/\btesting found bugs\b/gi, "Testing identified defects"],
-      [/\bbugs\b/gi, "defects"],
-      [/\bbug\b/gi, "defect"],
-      [/\bwe need\b/gi, "we require"],
-      [/\bmore days\b/gi, "additional days"],
-      [/\bfix\b/gi, "address"],
-    ],
-    genz: [
-      [/\btesting found bugs\b/gi, "Testing turned up some bugs"],
-      [/\bthe project is delayed\b/gi, "the timeline has slipped"],
-      [/\bwe need\b/gi, "we'll need"],
-      [/\bmore days\b/gi, "extra days"],
-    ],
-  };
-
-  let result = text;
-  for (const [pattern, replacement] of rules[persona]) {
-    result = result.replace(pattern, replacement);
-  }
-
-  if (formality >= 4) {
-    result = result
-      .replace(/\bcan't\b/gi, "cannot")
-      .replace(/\bdon't\b/gi, "do not")
-      .replace(/\bwon't\b/gi, "will not")
-      .replace(/\bASAP\b/g, "as soon as possible");
-  } else if (formality <= 2 && persona !== "legal") {
-    result = result
-      .replace(/\bcannot\b/gi, "can't")
-      .replace(/\bdo not\b/gi, "don't")
-      .replace(/\bapproximately\b/gi, "about");
-  }
-
-  return result.replace(/(^|[.!?]\s+)([a-z])/g, (_match, before, letter) => before + letter.toUpperCase());
-}
-
-function openingFor(persona, formality, enthusiasm) {
-  if (persona === "executive") {
-    return formality >= 4 ? "Executive update:" : enthusiasm >= 4 ? "A quick update:" : "Quick update:";
-  }
-  if (persona === "supportive") {
-    return formality >= 4 ? "Hello team," : enthusiasm >= 4 ? "Hi team —" : "Hi team,";
-  }
-  if (persona === "legal") {
-    return formality >= 4 ? "For factual review:" : "For review:";
-  }
-  return formality >= 4 ? "Quick update:" : enthusiasm >= 4 ? "Quick heads-up!" : "Quick heads-up:";
-}
-
-function closingFor(persona, enthusiasm) {
-  if (persona === "executive") return "Please review and share any questions.";
-  if (persona === "supportive") return enthusiasm >= 4 ? "Thanks for working through this together." : "Please let me know what you think.";
-  if (persona === "legal") return "Please confirm the details before external use.";
-  return enthusiasm >= 4 ? "Thanks for taking a look!" : "Let me know what you think.";
-}
-
-function buildRewrite(raw, persona, formality, verbosity, enthusiasm) {
-  const body = replacePhrases(cleanMessage(raw), persona, formality);
-  const opening = openingFor(persona, formality, enthusiasm);
-  const closing = closingFor(persona, enthusiasm);
-  let text = body;
-
-  if (verbosity === 2) text = `${opening} ${body}`;
-  if (verbosity >= 3) text = `${opening}\n\n${body}`;
-  if (verbosity >= 4) text += `\n\n${closing}`;
-  if (verbosity === 5) text += " If any detail needs correction, please tell me.";
-
-  const summary = `${PERSONA_LABELS[persona]} framing · ${TONE_LABELS.formality[formality - 1].toLowerCase()} formality · ${TONE_LABELS.verbosity[verbosity - 1].toLowerCase()} length · ${TONE_LABELS.enthusiasm[enthusiasm - 1].toLowerCase()} energy. Fixed local rules preserve your main text; review the result for accuracy.`;
-  return { text, summary };
 }
 
 function tokensFor(text) {
@@ -212,9 +177,9 @@ function setStatus(message, error = false) {
 }
 
 function formattedDraft(text, format) {
-  if (format === "email") return `Subject: Project update\n\n${text}`;
-  if (format === "slack") return `*Team update*\n\n${text}`;
-  if (format === "markdown") return `## Message\n\n${text}`;
+  if (format === "email") return `Subject: ${currentSubject}\n\n${text}`;
+  if (format === "slack") return `*${currentSubject}*\n\n${text}`;
+  if (format === "markdown") return `## ${currentSubject}\n\n${text}`;
   return text;
 }
 
@@ -232,10 +197,10 @@ function renderDraft() {
   copyLabel.textContent = "Copy draft";
 }
 
-function markDraftStale() {
-  if (!currentRewrite) return;
+function clearDraft() {
   baseRewrite = "";
   currentRewrite = "";
+  currentSubject = "";
   copyButton.disabled = true;
   downloadButton.disabled = true;
   copyLabel.textContent = "Copy draft";
@@ -247,37 +212,85 @@ function markDraftStale() {
   const originalPlaceholder = document.createElement("p");
   originalPlaceholder.textContent = "Rewrite to see your original message.";
   const rewritePlaceholder = document.createElement("p");
-  rewritePlaceholder.textContent = "Your refreshed draft will appear here.";
+  rewritePlaceholder.textContent = "Your new AI draft will appear here.";
   originalOutput.append(originalPlaceholder);
   rewrittenOutput.append(rewritePlaceholder);
-  setStatus("Settings changed. Rewrite to refresh the draft.");
 }
 
-form.addEventListener("submit", (event) => {
+function markDraftStale() {
+  const hadResult = Boolean(currentRewrite);
+  const cancelled = cancelPending();
+  clearDraft();
+  if (cancelled || hadResult) setStatus(cancelled ? "Rewrite cancelled because your input or settings changed. Rewrite when ready." : "Input or settings changed. Rewrite to refresh the draft.");
+}
+
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  cancelPending();
+  clearDraft();
   const raw = roughInput.value.trim();
-  if (!raw) {
-    setStatus("Add a rough message first, or choose Use example.", true);
+  if (!raw || raw.length > 1200) {
+    setStatus(!raw ? "Add a rough message first, or choose Use example." : "Please shorten the message to 1,200 characters or fewer.", true);
     roughInput.setAttribute("aria-invalid", "true");
     roughInput.focus();
     return;
   }
   roughInput.removeAttribute("aria-invalid");
-
-  const persona = form.elements.persona.value;
-  const formality = Number(form.elements.formality.value);
-  const verbosity = Number(form.elements.verbosity.value);
-  const enthusiasm = Number(form.elements.enthusiasm.value);
-  const result = buildRewrite(raw, persona, formality, verbosity, enthusiasm);
-  baseRewrite = result.text;
-  currentRaw = raw;
-  currentSummary = result.summary;
-  renderDraft();
-  setStatus("Draft ready. Compare the highlighted changes before using it.");
+  const settings = {
+    text: raw,
+    persona: form.elements.persona.value,
+    formality: Number(form.elements.formality.value),
+    verbosity: Number(form.elements.verbosity.value),
+    enthusiasm: Number(form.elements.enthusiasm.value),
+  };
+  const sequence = ++requestSequence;
+  const controller = new AbortController();
+  pendingController = controller;
+  setBusy(true);
+  setStatus("Rewriting with AI. The first request may take longer while the local model loads. You can cancel anytime.");
+  let timedOut = false;
+  const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 125000);
+  try {
+    const response = await fetch("/api/rewrite", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settings),
+      signal: controller.signal,
+    });
+    let result;
+    try { result = await response.json(); }
+    catch { throw new Error("The server returned an unreadable response. Start the app with node server.mjs and try again."); }
+    if (sequence !== requestSequence || controller.signal.aborted) return;
+    if (!response.ok) throw new Error(result.error || "The model could not rewrite this message. Try again.");
+    if (typeof result.text !== "string" || !result.text.trim() || result.text.length > 6000 || typeof result.subject !== "string" || !result.subject.trim() || result.subject.length > 200) {
+      throw new Error("The model returned an incomplete or oversized draft. Please try again.");
+    }
+    baseRewrite = result.text;
+    currentSubject = result.subject.replace(/[\r\n]+/g, " ").trim();
+    currentRaw = raw;
+    currentSummary = `${PERSONA_LABELS[settings.persona]} · ${TONE_LABELS.formality[settings.formality - 1]} formality · ${TONE_LABELS.verbosity[settings.verbosity - 1]} length · ${TONE_LABELS.enthusiasm[settings.enthusiasm - 1]} energy. Generated by ${result.model || "AI"}. Review the highlighted changes for accuracy.`;
+    renderDraft();
+    showConnection({ ready: true, provider: result.provider, model: result.model });
+    setStatus("Draft ready. Check the original meaning, requests, dates, and amounts before using it.");
+  } catch (error) {
+    if (sequence !== requestSequence) return;
+    if (controller.signal.aborted) setStatus(timedOut ? "The rewrite took too long and was cancelled. Try a shorter message or check Ollama, then retry." : "Rewrite cancelled. Your message has not changed.", timedOut);
+    else setStatus(error instanceof TypeError ? "Cannot reach the Node server. Check that node server.mjs is running, then retry." : error.message, true);
+  } finally {
+    clearTimeout(timeout);
+    if (sequence === requestSequence) {
+      pendingController = null;
+      setBusy(false);
+    }
+  }
 });
+
+cancelButton.addEventListener("click", () => cancelPending("Rewrite cancelled. Your message has not changed."));
+connectionRetry.addEventListener("click", checkConnection);
 
 for (const button of formatButtons) {
   button.addEventListener("click", () => {
+    cancelPending("Rewrite cancelled because the output format changed. Select Rewrite message when ready.");
     selectedFormat = button.dataset.format;
     for (const option of formatButtons) option.setAttribute("aria-pressed", String(option === button));
     formatDescription.textContent = FORMAT_DESCRIPTIONS[selectedFormat];
@@ -357,3 +370,4 @@ for (const input of form.querySelectorAll('input[name="persona"]')) {
 }
 updateCharacterCount();
 updateToneLabels();
+checkConnection();

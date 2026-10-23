@@ -1,0 +1,100 @@
+{
+  "runAt": "2026-10-23T10:02:04.077Z",
+  "model": "qwen3:4b",
+  "modelRequests": 6,
+  "results": [
+    {
+      "name": "invoice request",
+      "text": "Please send the invoice.",
+      "persona": "executive",
+      "formality": 5,
+      "verbosity": 2,
+      "enthusiasm": 1,
+      "status": 200,
+      "result": {
+        "text": "Please send the invoice.",
+        "subject": "Invoice request",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 1978
+    },
+    {
+      "name": "ordinary bugs",
+      "text": "I found a few bugs in the search filter. Can you review them tomorrow?",
+      "persona": "legal",
+      "formality": 5,
+      "verbosity": 3,
+      "enthusiasm": 1,
+      "status": 200,
+      "result": {
+        "text": "I've identified a few issues with the search filter. Could you please review them by tomorrow?",
+        "subject": "Search filter issues review request",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 916
+    },
+    {
+      "name": "deadline and amount",
+      "text": "Please send the revised invoice for INR 12,500 by 25 October at 3:00 PM. Do not charge the extra INR 500.",
+      "persona": "executive",
+      "formality": 5,
+      "verbosity": 2,
+      "enthusiasm": 1,
+      "status": 200,
+      "result": {
+        "text": "Please send the revised invoice for INR 12,500 by 25 October at 3:00 PM. Do not charge the extra INR 500.",
+        "subject": "Revised invoice for INR 12,500 due by 25 Oct 3:00 PM",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 4520
+    },
+    {
+      "name": "mixed language",
+      "text": "Kal ki meeting 4:30 PM par shift kar do please. Budget INR 8,000 hi rakhna, extra payment approve nahi hai.",
+      "persona": "supportive",
+      "formality": 2,
+      "verbosity": 3,
+      "enthusiasm": 3,
+      "status": 502,
+      "result": {
+        "error": "The model changed a currency or date reference. Draft rejected; please retry."
+      },
+      "elapsedMs": 2183
+    },
+    {
+      "name": "casual unfamiliar",
+      "text": "I cannot attend the rehearsal on Friday. Please share the recording and keep my registration active.",
+      "persona": "genz",
+      "formality": 1,
+      "verbosity": 2,
+      "enthusiasm": 4,
+      "status": 200,
+      "result": {
+        "text": "I'm unable to make it to Friday's rehearsal. Could you please send the recording and keep my registration active?",
+        "subject": "Friday rehearsal recording and registration update request",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 1521
+    },
+    {
+      "name": "same meaning warmer fuller",
+      "text": "I cannot attend the rehearsal on Friday. Please share the recording and keep my registration active.",
+      "persona": "supportive",
+      "formality": 4,
+      "verbosity": 5,
+      "enthusiasm": 4,
+      "status": 200,
+      "result": {
+        "text": "I'm unable to attend the Friday rehearsal. Could you please share the recording and maintain my registration status?",
+        "subject": "Friday rehearsal recording and registration request",
+        "provider": "ollama",
+        "model": "qwen3:4b"
+      },
+      "elapsedMs": 1393
+    }
+  ]
+}
