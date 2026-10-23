@@ -1,0 +1,11 @@
+{
+  "name": "viberewrite-2026",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test app-tests/*.test.mjs",
+    "test:live": "node app-tests/live-model.mjs"
+  }
+}

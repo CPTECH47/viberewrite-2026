@@ -202,6 +202,7 @@ mark { border-radius: 3px; padding: 1px 0; color: inherit; }
 .change-panel p { margin: 7px 0 0; color: #acbbcb; font-size: 11px; line-height: 1.5; }
 .demo-notice { display: flex; align-items: start; gap: 8px; margin: 16px 1px 0; color: #8fa4b4; font-size: 10px; line-height: 1.5; }
 .demo-notice span { color: var(--peach); font-size: 15px; line-height: 0.95; }
+.demo-notice #privacy-notice { color: inherit; font-size: inherit; line-height: inherit; }
 .site-footer { display: flex; justify-content: space-between; gap: 20px; padding-block: 29px 32px; color: var(--quiet); font-size: 10px; }
 
 @media (max-width: 1060px) {
@@ -285,3 +286,22 @@ textarea[aria-invalid="true"] { border-color: #f0a89e; box-shadow: 0 0 0 3px rgb
 @media (max-width: 1250px) { .format-bar { flex-direction: column; align-items: stretch; } .format-options { align-self: start; } }
 @media (max-width: 760px) { .site-header { height: 72px; } .hero { padding-top: 43px; } }
 @media (max-width: 510px) { .format-options { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); } .format-option { padding-inline: 4px; } .input-support { align-items: start; } }
+
+.connection-panel { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 16px 20px; margin-bottom: 18px; border: 1px solid var(--line); border-radius: 13px; background: rgba(18, 31, 48, 0.85); }
+.connection-panel > div { flex: 1 1 300px; }
+.connection-panel strong { font-size: 12px; color: #dfeff2; }
+.connection-panel p { margin: 5px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+.connection-panel details { flex-basis: 100%; border-top: 1px solid var(--line); padding-top: 10px; }
+.connection-panel details[hidden] { display: none; }
+.connection-panel summary { cursor: pointer; color: var(--mint); font-size: 11px; }
+.connection-panel code { color: #ceeae6; overflow-wrap: anywhere; }
+.mode-badge[data-state="offline"] { color: #f5c7b5; border-color: rgba(245, 199, 181, 0.3); }
+.mode-badge[data-state="offline"] .mode-dot { background: #e8aa8f; box-shadow: none; }
+.mode-badge[data-state="checking"] .mode-dot { background: #c0bfdc; box-shadow: none; }
+.rewrite-actions { display: flex; gap: 9px; align-items: stretch; margin-top: 28px; }
+.rewrite-actions .rewrite-button { margin-top: 0; }
+.rewrite-button:disabled { opacity: 0.65; transform: none; box-shadow: none; }
+.cancel-button { flex: none; border: 1px solid rgba(245, 199, 181, 0.4); border-radius: 10px; padding: 10px 14px; color: #f5c7b5; background: #241f2a; font-size: 12px; font-weight: 700; }
+.cancel-button[hidden] { display: none; }
+.cancel-button:focus-visible { outline: 3px solid #f8cf9f; outline-offset: 2px; }
+.cancel-button:hover { background: #372836; }
